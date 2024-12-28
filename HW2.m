@@ -5,11 +5,10 @@ spiral_ds=load("Spiral.mat").X;
 circle_ds=load("Circle.mat").X;
 
 
-mat(circle_ds,1);
+mat(circle_ds,1)
 
 
 
-disp("nj")
 
 
 function m = mat(ds,sigma)
