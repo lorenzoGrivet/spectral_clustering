@@ -34,7 +34,7 @@ U = eigenvectors(:, 1:3);
 
 clusters = kmeans(U, 3);
 
-
+scatter(circle_ds(:,1),circle_ds(:,2),3,clusters)
 
 
     
