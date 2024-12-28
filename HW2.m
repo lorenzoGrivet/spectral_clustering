@@ -9,7 +9,7 @@ mat(circle_ds,1);
 
 
 
-
+disp("nj")
 
 
 function m = mat(ds,sigma)
