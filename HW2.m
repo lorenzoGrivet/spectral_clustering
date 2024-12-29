@@ -24,8 +24,12 @@ opts.maxit = 1000; % Numero massimo di iterazioni
 [eigenvectors, eigenvaluesMatrix] = eigs(L, k, 'smallestabs', opts);
 
 
+figure;
 eigenvalues = diag(eigenvaluesMatrix);
-plot(eigenvalues)
+plot(eigenvalues, '-o', 'MarkerSize', 5, 'Color', 'b');
+
+
+
 
 %usiamo i primi 3 autovalori in quanto sono i più vicini a 0, di
 %conseguenza costruiamo la matrice U con i primi 3 autovettori
@@ -34,10 +38,13 @@ U = eigenvectors(:, 1:3);
 
 clusters = kmeans(U, 3);
 
-scatter(circle_ds(:,1),circle_ds(:,2),3,clusters)
+figure;
+scatter(circle_ds(:,1),circle_ds(:,2),15,clusters, 'filled')
+colormap(jet);
 
 
-    
+
+
 function m = mat(ds,sigma)
     [r,~]=size(ds);
     m=zeros(r,r);   
