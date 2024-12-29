@@ -2,26 +2,29 @@ clc;
 clear;
 format long;
 
-
+% Here we open the files and we store the data in separate matrices
 spiral_ds=load("Spiral.mat").X;
 circle_ds=load("Circle.mat").X;
  
 
 
-create_clusters(circle_ds, 10, 20)
-create_clusters(spiral_ds, 10,20)
+main(circle_ds, 10, 20)
+main(spiral_ds, 10,20)
 
 
-function create_clusters(ds, k, n_eigen)
-    S = similarity_matrix(ds,1);
-    W = knn(S, k);
-    D = degreeMatrix(W);
-    L = D - W;
+% main function that runs all
+function main(ds, k, n_eigen)
+    S = similarity_matrix(ds,1);  % construction of the similarity matrix
+    W = knn(S, k); % using knn algorithm we compute the adjacency matrix
+    D = degreeMatrix(W); % construction of the degree matrix
+    L = D - W; % Laplacian matrix 
+    % W, D, L matrices are stored in sparse format
+
+    % computation of the eigenvalues and eigenvectors
     [eigenvectors, eigenvaluesMatrix] = eigs(L, n_eigen, 'smallestabs');
-    
-    
     figure;
     eigenvalues = diag(eigenvaluesMatrix);
+    % plot of the n smallest eigenvalues,
     plot(eigenvalues, '-o', 'MarkerSize', 5, 'Color', 'b');
     xlabel('Eigenvalues');
     ylabel('Value')
@@ -29,16 +32,21 @@ function create_clusters(ds, k, n_eigen)
     
     
     
+    
+    % we only consider the eigevalues closest to 0 by setting a treshold of 0.01.
+    % The matrix U is then computed using their corresponding eigenvectors.
+    
     threshold = 0.01;
     n_clusters = nnz(eigenvalues <= threshold);
 
-    %we take the first n eigenvalues as they are the closest one to 0, given
-    %that we compute the matrix U with their corresponding eigenvectors
 
     U = eigenvectors(:, 1:n_clusters);
     
     clusters = kmeans(U, n_clusters);
     
+
+    % scatter plot of the dataset points with respect to the clusters
+    % computed by the kmeans algrithm 
     figure;
     scatter(ds(:,1), ds(:,2), 15, clusters, 'filled')
     colormap(jet);
@@ -61,7 +69,7 @@ function m = similarity_matrix(ds,sigma)
                 m(i,j)=0;
             else
                 v=f_sim(ds(i,1:2),ds(j,1:2),sigma);
-                if v > 1e-7
+                if v > 1e-7  % threshold set to take into account only the points with significative distance
                     m(i,j)=v;
                     m(j,i)=v;
                 end 
