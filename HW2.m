@@ -2,53 +2,56 @@ clc;
 clear;
 format long;
 
+
 spiral_ds=load("Spiral.mat").X;
 circle_ds=load("Circle.mat").X;
  
-S = mat(circle_ds,1);
 
 
-W = knn(S, 10);
-D = degreeMatrix(W);
-L = D - W;
-
-% G = graph(W);
-% [bin, numComponents] = conncomp(G);
+create_clusters(circle_ds, 10, 20)
+create_clusters(spiral_ds, 10,20)
 
 
-k = 20; 
-opts.tol = 1e-10; % Tolleranza
-opts.maxit = 1000; % Numero massimo di iterazioni
+function create_clusters(ds, k, n_eigen)
+    S = similarity_matrix(ds,1);
+    W = knn(S, k);
+    D = degreeMatrix(W);
+    L = D - W;
+    [eigenvectors, eigenvaluesMatrix] = eigs(L, n_eigen, 'smallestabs');
+    
+    
+    figure;
+    eigenvalues = diag(eigenvaluesMatrix);
+    plot(eigenvalues, '-o', 'MarkerSize', 5, 'Color', 'b');
+    xlabel('Eigenvalues');
+    ylabel('Value')
+    title(sprintf('First %d eigenvalues', n_eigen))
+    
+    
+    
+    threshold = 0.01;
+    n_clusters = nnz(eigenvalues <= threshold);
+
+    %we take the first n eigenvalues as they are the closest one to 0, given
+    %that we compute the matrix U with their corresponding eigenvectors
+
+    U = eigenvectors(:, 1:n_clusters);
+    
+    clusters = kmeans(U, n_clusters);
+    
+    figure;
+    scatter(ds(:,1), ds(:,2), 15, clusters, 'filled')
+    colormap(jet);
+    xlabel('X')
+    ylabel('Y')
+    title('Dataset clusters')
+
+end
 
 
-[eigenvectors, eigenvaluesMatrix] = eigs(L, k, 'smallestabs', opts);
 
 
-figure;
-eigenvalues = diag(eigenvaluesMatrix);
-plot(eigenvalues, '-o', 'MarkerSize', 5, 'Color', 'b');
-xlabel('Eigenvalues');
-ylabel('Value')
-title(sprintf('First %d eigenvalues', k))
-
-%we take the first 3 eigenvalues as they are the closest one to 0, given
-%that we compute the matrix U with their corresponding eigenvectors
-
-U = eigenvectors(:, 1:3);
-
-clusters = kmeans(U, 3);
-
-figure;
-scatter(circle_ds(:,1),circle_ds(:,2),15,clusters, 'filled')
-colormap(jet);
-xlabel('X')
-ylabel('Y')
-title('Dataset clusters')
-
-
-
-
-function m = mat(ds,sigma)
+function m = similarity_matrix(ds,sigma)
     [r,~]=size(ds);
     m=zeros(r,r);   
     for i=1:r
