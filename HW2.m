@@ -27,12 +27,12 @@ opts.maxit = 1000; % Numero massimo di iterazioni
 figure;
 eigenvalues = diag(eigenvaluesMatrix);
 plot(eigenvalues, '-o', 'MarkerSize', 5, 'Color', 'b');
+xlabel('Eigenvalues');
+ylabel('Value')
+title(sprintf('First %d eigenvalues', k))
 
-
-
-
-%usiamo i primi 3 autovalori in quanto sono i più vicini a 0, di
-%conseguenza costruiamo la matrice U con i primi 3 autovettori
+%we take the first 3 eigenvalues as they are the closest one to 0, given
+%that we compute the matrix U with their corresponding eigenvectors
 
 U = eigenvectors(:, 1:3);
 
@@ -41,6 +41,9 @@ clusters = kmeans(U, 3);
 figure;
 scatter(circle_ds(:,1),circle_ds(:,2),15,clusters, 'filled')
 colormap(jet);
+xlabel('X')
+ylabel('Y')
+title('Dataset clusters')
 
 
 
