@@ -19,7 +19,8 @@ else
     disp("Cluster (spiral) non corretti");
 end
 
-
+k_means(spiral_ds,3)
+k_means(circle_ds,3)
 
 % main function that runs all
 function clusters=main(ds, k, n_eigen, threshold, name)
@@ -116,6 +117,7 @@ function D = degreeMatrix(W)
 end
 
 function b=check_clusters(ds,cl)
+
     %check if clusters we found are the same of the ones in the third
     %column of the file spiral.mat indipendentemente of the order
     %********************************************************************* 
@@ -150,3 +152,21 @@ function b=check_clusters(ds,cl)
 
     end
 end
+
+
+function k_means(ds,k)
+    ds=ds(:,1:2);
+    [idx, C] = kmeans(ds, k);
+    
+    figure;
+    gscatter(ds(:,1), ds(:,2), idx);
+    hold on;
+    plot(C(:,1), C(:,2), 'kx', 'MarkerSize', 15, 'LineWidth', 3);
+    legend('Cluster 1', 'Cluster 2', 'Cluster 3', 'Centroidi');
+    title('Clustering k-means');
+    hold off;
+end
+
+
+
+
