@@ -1,5 +1,6 @@
 clc;
 clear;
+close all;
 format long;
 
 % Here we open the files and we store the data in separate matrices
