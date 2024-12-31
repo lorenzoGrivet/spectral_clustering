@@ -22,7 +22,39 @@ end
 k_means(spiral_ds,3)
 k_means(circle_ds,3)
 
-% main function that runs all
+%%
+%esempi di chat, da pensarci
+%dbscan
+epsilon = 0.5; % distanza massima tra punti per considerarli vicini
+minPts = 3;    % numero minimo di punti richiesti per formare un cluster
+[labels, ~] = dbscan(spiral_ds, epsilon, minPts);
+
+figure;
+scatter(spiral_ds(:,1), spiral_ds(:,2), 15, labels, 'filled');
+title('DBSCAN Clustering');
+xlabel('X');
+ylabel('Y');
+
+%hierarchical
+Z = linkage(circle_ds, 'ward'); % Metrica di linkage
+numClusters = 3; % Numero di cluster desiderati
+clusters = cluster(Z, 'maxclust', numClusters);
+
+% Visualizzazione
+figure;
+scatter(circle_ds(:,1), circle_ds(:,2), 15, clusters, 'filled');
+title('Hierarchical Clustering');
+xlabel('X');
+ylabel('Y');
+
+% Dendrogramma
+figure;
+dendrogram(Z);
+title('Dendrogram');
+
+
+%%
+
 function clusters=main(ds, k, n_eigen, threshold, name)
     S = similarity_matrix(ds,1);  % construction of the similarity matrix
     W = knn(S, k); % using knn algorithm we compute the adjacency matrix
