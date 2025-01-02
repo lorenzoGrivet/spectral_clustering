@@ -20,8 +20,8 @@ else
     disp("Cluster (spiral) non corretti");
 end
 
-k_means(spiral_ds,3)
-k_means(circle_ds,3)
+% k_means(spiral_ds,3)
+% k_means(circle_ds,3)
 
 %%
 %esempi di chat, da pensarci
@@ -67,13 +67,14 @@ function clusters=main(ds, k, n_eigen, threshold, name)
     [eigenvectors, eigenvaluesMatrix] = eigs(L, n_eigen, 'smallestabs');
     figure;
     eigenvalues = diag(eigenvaluesMatrix);
+
     % plot of the n smallest eigenvalues,
     semilogy(eigenvalues, '-o', 'MarkerSize', 5, 'Color', 'b');
     xlabel('Eigenvalues');
     ylabel('Value')
     title(sprintf('First %d eigenvalues. %s', n_eigen,name))
     
-    % we only consider the eigevalues closest to 0 by setting a treshold of 0.01.
+    % We only consider the eigevalues closest to 0 by setting a treshold.
     % The matrix U is then computed using their corresponding eigenvectors.
     
     n_clusters = nnz(eigenvalues <= threshold);
@@ -87,7 +88,8 @@ function clusters=main(ds, k, n_eigen, threshold, name)
     % scatter plot of the dataset points with respect to the clusters
     % computed by the kmeans algrithm 
     figure;
-    scatter(ds(:,1), ds(:,2), 15, clusters, 'filled')
+    gscatter(ds(:,1), ds(:,2), clusters)
+    legend('Cluster 1', 'Cluster 2', 'Cluster 3');
     colormap(jet);
     xlabel('X')
     ylabel('Y')
