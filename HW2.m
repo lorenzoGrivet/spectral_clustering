@@ -12,6 +12,7 @@ circle_ds=load("Circle.mat").X;
 thresh_c=0.01;
 thresh_s=0.001;
 
+
 cl_spiral=main(spiral_ds, 10, 20,thresh_s,"Spiral");
 cl_circle=main(circle_ds, 10, 20,thresh_c,"Circle");
 
@@ -20,9 +21,6 @@ if check_clusters(spiral_ds,cl_spiral)
 else
     disp("Cluster (spiral) non corretti");
 end
-
-% k_means(spiral_ds,3)
-% k_means(circle_ds,3)
 
 %%
 % %esempi di chat, da pensarci
@@ -63,8 +61,7 @@ figure
 scatter(spiral_ds(:, 1), spiral_ds(:, 2), 'filled')
 
 %%
-
-function clusters=main(ds, k, n_eigen, threshold, name)
+function clusters = main(ds, k, n_eigen, threshold, name)
     S = similarity_matrix(ds,1);  % construction of the similarity matrix
     W = knn(S, k); % using knn algorithm we compute the adjacency matrix
     D = degreeMatrix(W); % construction of the degree matrix
@@ -87,8 +84,8 @@ function clusters=main(ds, k, n_eigen, threshold, name)
     
     n_clusters = nnz(eigenvalues <= threshold);
 
-
     U = eigenvectors(:, 1:n_clusters);
+   
     
     clusters = kmeans(U, n_clusters);
     
@@ -175,7 +172,12 @@ function W = knn(S, k)
             M(i,sortedIndices(j)) = S(i,sortedIndices(j));
             M(sortedIndices(j), i) = S(i,sortedIndices(j));
         end
+
     end
+    
+
+    %Elements added to make the matrix simmetrycal
+    disp(nnz(M) - 10*m)
 
     if M == M'
         W = sparse(M);
