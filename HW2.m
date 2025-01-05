@@ -7,6 +7,7 @@ format long;
 spiral_ds=load("Spiral.mat").X;
 circle_ds=load("Circle.mat").X;
 
+
 %spiegare perché scelta soglia
 thresh_c=0.01;
 thresh_s=0.001;
@@ -24,35 +25,42 @@ end
 % k_means(circle_ds,3)
 
 %%
-%esempi di chat, da pensarci
-%dbscan
-epsilon = 0.5; % distanza massima tra punti per considerarli vicini
-minPts = 3;    % numero minimo di punti richiesti per formare un cluster
-[labels, ~] = dbscan(spiral_ds, epsilon, minPts);
+% %esempi di chat, da pensarci
+% %dbscan
+% epsilon = 0.5; % distanza massima tra punti per considerarli vicini
+% minPts = 5;    % numero minimo di punti richiesti per formare un cluster
+% [labels, ~] = dbscan(spiral_ds, epsilon, minPts);
+% 
+% figure;
+% scatter(spiral_ds(:,1), spiral_ds(:,2), 15, labels, 'filled');
+% title('DBSCAN Clustering');
+% xlabel('X');
+% ylabel('Y');
+% 
+% %hierarchical
+% Z = linkage(circle_ds, 'ward'); % Metrica di linkage
+% numClusters = 3; % Numero di cluster desiderati
+% clusters = cluster(Z, 'maxclust', numClusters);
+% 
+% % Visualizzazione
+% figure;
+% scatter(circle_ds(:,1), circle_ds(:,2), 15, clusters, 'filled');
+% title('Hierarchical Clustering');
+% xlabel('X');
+% ylabel('Y');
+% 
+% % Dendrogramma
+% figure;
+% dendrogram(Z);
+% title('Dendrogram');
+% 
 
-figure;
-scatter(spiral_ds(:,1), spiral_ds(:,2), 15, labels, 'filled');
-title('DBSCAN Clustering');
-xlabel('X');
-ylabel('Y');
-
-%hierarchical
-Z = linkage(circle_ds, 'ward'); % Metrica di linkage
-numClusters = 3; % Numero di cluster desiderati
-clusters = cluster(Z, 'maxclust', numClusters);
-
-% Visualizzazione
-figure;
-scatter(circle_ds(:,1), circle_ds(:,2), 15, clusters, 'filled');
-title('Hierarchical Clustering');
-xlabel('X');
-ylabel('Y');
-
-% Dendrogramma
-figure;
-dendrogram(Z);
-title('Dendrogram');
-
+%%
+figure
+scatter(circle_ds(:, 1), circle_ds(:, 2), 'filled' )
+%%
+figure
+scatter(spiral_ds(:, 1), spiral_ds(:, 2), 'filled')
 
 %%
 
@@ -94,6 +102,35 @@ function clusters=main(ds, k, n_eigen, threshold, name)
     xlabel('X')
     ylabel('Y')
     title(sprintf('%s dataset clusters', name))
+
+
+
+
+    %dbscan
+    epsilon = 0.05; % distanza massima tra punti per considerarli vicini
+    minPts = 3;    % numero minimo di punti richiesti per formare un cluster
+    [labels, ~] = dbscan(U, epsilon, minPts);
+    
+    figure;
+    scatter(ds(:,1), ds(:,2), 15, labels, 'filled');
+    title('DBSCAN Clustering');
+    xlabel('X');
+    ylabel('Y');
+
+
+
+
+    %hierarchical
+    Z = linkage(U, 'ward'); % Metrica di linkage
+    numClusters = 3; % Numero di cluster desiderati
+    clusters = cluster(Z, 'maxclust', numClusters);
+    
+    % Visualizzazione
+    figure;
+    scatter(ds(:,1), ds(:,2), 15, clusters, 'filled');
+    title('Hierarchical Clustering');
+    xlabel('X');
+    ylabel('Y');
 
 end
 
@@ -201,6 +238,7 @@ function k_means(ds,k)
     title('Clustering k-means');
     hold off;
 end
+
 
 
 
