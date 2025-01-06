@@ -23,35 +23,8 @@ else
 end
 
 %%
-% %esempi di chat, da pensarci
-% %dbscan
-% epsilon = 0.5; % distanza massima tra punti per considerarli vicini
-% minPts = 5;    % numero minimo di punti richiesti per formare un cluster
-% [labels, ~] = dbscan(spiral_ds, epsilon, minPts);
-% 
-% figure;
-% scatter(spiral_ds(:,1), spiral_ds(:,2), 15, labels, 'filled');
-% title('DBSCAN Clustering');
-% xlabel('X');
-% ylabel('Y');
-% 
-% %hierarchical
-% Z = linkage(circle_ds, 'ward'); % Metrica di linkage
-% numClusters = 3; % Numero di cluster desiderati
-% clusters = cluster(Z, 'maxclust', numClusters);
-% 
-% % Visualizzazione
-% figure;
-% scatter(circle_ds(:,1), circle_ds(:,2), 15, clusters, 'filled');
-% title('Hierarchical Clustering');
-% xlabel('X');
-% ylabel('Y');
-% 
-% % Dendrogramma
-% figure;
-% dendrogram(Z);
-% title('Dendrogram');
-% 
+k_means(spiral_ds,3)
+k_means(circle_ds,3)
 
 %%
 figure
@@ -236,7 +209,7 @@ function k_means(ds,k)
     gscatter(ds(:,1), ds(:,2), idx);
     hold on;
     plot(C(:,1), C(:,2), 'kx', 'MarkerSize', 15, 'LineWidth', 3);
-    legend('Cluster 1', 'Cluster 2', 'Cluster 3', 'Centroidi');
+    legend('Cluster 1', 'Cluster 2', 'Cluster 3', 'Centroids');
     title('Clustering k-means');
     hold off;
 end
