@@ -94,8 +94,7 @@ function clusters = main(ds, k, n_eigen, threshold, name)
     Z = linkage(U, 'ward'); % Metrica di linkage
     numClusters = 3; % Numero di cluster desiderati
     clusters = cluster(Z, 'maxclust', numClusters);
-    
-    % Visualizzazione
+  
     figure;
     scatter(ds(:,1), ds(:,2), 15, clusters, 'filled');
     title('Hierarchical Clustering');
@@ -117,7 +116,8 @@ function m = similarity_matrix(ds,sigma)
                 m(i,j)=0;
             else
                 v=f_sim(ds(i,1:2),ds(j,1:2),sigma);
-                if v > 1e-7  % threshold set to take into account only the points with significative distance
+                if v > 1e-7  % threshold set to take into account only 
+                             % the points with significative distance
                     m(i,j)=v;
                     m(j,i)=v;
                 end 
