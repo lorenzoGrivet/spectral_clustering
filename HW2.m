@@ -12,9 +12,12 @@ circle_ds=load("Circle.mat").X;
 thresh_c=0.01;
 thresh_s=0.001;
 
-
-cl_spiral=main(spiral_ds, 10, 20,thresh_s,"Spiral");
-cl_circle=main(circle_ds, 10, 20,thresh_c,"Circle");
+k=20;
+ks=[10,20,40];
+for i = 1:length(ks)
+    cl_spiral=main(spiral_ds, ks(i), 20,thresh_s,"Spiral");
+    cl_circle=main(circle_ds, ks(i), 20,thresh_c,"Circle");
+end
 
 if check_clusters(spiral_ds,cl_spiral)
     disp("Cluster (spiral) corretti");
@@ -23,15 +26,15 @@ else
 end
 
 %%
-k_means(spiral_ds,3)
-k_means(circle_ds,3)
-
-%%
-figure
-scatter(circle_ds(:, 1), circle_ds(:, 2), 'filled' )
-%%
-figure
-scatter(spiral_ds(:, 1), spiral_ds(:, 2), 'filled')
+% k_means(spiral_ds,3)
+% k_means(circle_ds,3)
+% 
+% %%
+% figure
+% scatter(circle_ds(:, 1), circle_ds(:, 2), 'filled' )
+% %%
+% figure
+% scatter(spiral_ds(:, 1), spiral_ds(:, 2), 'filled')
 
 %%
 function clusters = main(ds, k, n_eigen, threshold, name)
@@ -41,6 +44,37 @@ function clusters = main(ds, k, n_eigen, threshold, name)
     L = D - W; % Laplacian matrix 
     % W, D, L matrices are stored in sparse format
     
+    
+    % We only consider the eigevalues closest to 0 by setting a treshold.
+    % The matrix U is then computed using their corresponding eigenvectors.
+
+    [eigenvalues,eigenvectors]=eigen(L,n_eigen,name,k);
+    
+    n_clusters = nnz(eigenvalues <= threshold);
+    U = eigenvectors(:, 1:n_clusters);
+   
+    clusters = kmeans(U, n_clusters);
+
+    plot_clusters(ds,clusters,name,k)
+
+    %other methods
+    hierarchical_cl(ds,U);
+    dbscan_cl(ds,U);
+end
+
+function plot_clusters(ds,clusters,name,k)
+    % scatter plot of the dataset points with respect to the clusters
+    % computed by the kmeans algrithm 
+    figure;
+    gscatter(ds(:,1), ds(:,2), clusters)
+    legend('Cluster 1', 'Cluster 2', 'Cluster 3');
+    colormap(jet);
+    xlabel('X')
+    ylabel('Y')
+    title(sprintf('k=%d. %s dataset clusters', k,name))
+end
+
+function [eigenvalues,eigenvectors]=eigen(L,n_eigen,name,k)
     % computation of the eigenvalues and eigenvectors
     [eigenvectors, eigenvaluesMatrix] = eigs(L, n_eigen, 'smallestabs');
     figure;
@@ -50,47 +84,11 @@ function clusters = main(ds, k, n_eigen, threshold, name)
     semilogy(eigenvalues, '-o', 'MarkerSize', 5, 'Color', 'b');
     xlabel('Eigenvalues');
     ylabel('Value')
-    title(sprintf('First %d eigenvalues. %s', n_eigen,name))
-    
-    % We only consider the eigevalues closest to 0 by setting a treshold.
-    % The matrix U is then computed using their corresponding eigenvectors.
-    
-    n_clusters = nnz(eigenvalues <= threshold);
+    title(sprintf('k=%d. First %d eigenvalues. %s',k, n_eigen,name))
+end
 
-    U = eigenvectors(:, 1:n_clusters);
-   
-    
-    clusters = kmeans(U, n_clusters);
-    
-
-    % scatter plot of the dataset points with respect to the clusters
-    % computed by the kmeans algrithm 
-    figure;
-    gscatter(ds(:,1), ds(:,2), clusters)
-    legend('Cluster 1', 'Cluster 2', 'Cluster 3');
-    colormap(jet);
-    xlabel('X')
-    ylabel('Y')
-    title(sprintf('%s dataset clusters', name))
-
-
-
-
-    %dbscan
-    epsilon = 0.05; % distanza massima tra punti per considerarli vicini
-    minPts = 3;    % numero minimo di punti richiesti per formare un cluster
-    [labels, ~] = dbscan(U, epsilon, minPts);
-    
-    figure;
-    scatter(ds(:,1), ds(:,2), 15, labels, 'filled');
-    title('DBSCAN Clustering');
-    xlabel('X');
-    ylabel('Y');
-
-
-
-
-    %hierarchical
+function hierarchical_cl(ds,U)
+%hierarchical
     Z = linkage(U, 'ward'); % Metrica di linkage
     numClusters = 3; % Numero di cluster desiderati
     clusters = cluster(Z, 'maxclust', numClusters);
@@ -101,7 +99,19 @@ function clusters = main(ds, k, n_eigen, threshold, name)
     title('Hierarchical Clustering');
     xlabel('X');
     ylabel('Y');
+end
 
+function dbscan_cl(ds,U)
+    %dbscan
+    epsilon = 0.05; % distanza massima tra punti per considerarli vicini
+    minPts = 3;    % numero minimo di punti richiesti per formare un cluster
+    [labels, ~] = dbscan(U, epsilon, minPts);
+    
+    figure;
+    scatter(ds(:,1), ds(:,2), 15, labels, 'filled');
+    title('DBSCAN Clustering');
+    xlabel('X');
+    ylabel('Y');
 end
 
 
