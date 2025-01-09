@@ -8,13 +8,21 @@ spiral_ds=load("Spiral.mat").X;
 circle_ds=load("Circle.mat").X;
 
 
-%spiegare perché scelta soglia
-thresh_c=0.01;
-thresh_s=0.001;
 
-k=20;
 ks=[10,20,40];
 for i = 1:length(ks)
+
+    if ks(i)==10
+        thresh_c=0.01;
+        thresh_s=0.001;
+    elseif ks(i)==20
+        thresh_c=0.1;
+        thresh_s=0.003;
+    elseif ks(i)==40
+        thresh_c=0.1;
+        thresh_s=0.003;
+    end
+
     cl_spiral=main(spiral_ds, ks(i), 20,thresh_s,"Spiral");
     cl_circle=main(circle_ds, ks(i), 20,thresh_c,"Circle");
 end
@@ -37,13 +45,14 @@ end
 % scatter(spiral_ds(:, 1), spiral_ds(:, 2), 'filled')
 
 %%
-function clusters = main(ds, k, n_eigen, threshold, name)
+function clusters = main(ds, k, n_eigen,threshold, name)
     S = similarity_matrix(ds,1);  % construction of the similarity matrix
     W = knn(S, k); % using knn algorithm we compute the adjacency matrix
     D = degreeMatrix(W); % construction of the degree matrix
     L = D - W; % Laplacian matrix 
     % W, D, L matrices are stored in sparse format
     
+   
     
     % We only consider the eigevalues closest to 0 by setting a treshold.
     % The matrix U is then computed using their corresponding eigenvectors.
