@@ -11,8 +11,20 @@ circle_ds=load("Circle.mat").X;
 
 ks=[10,20,40];
 for i = 1:length(ks)
-    cl_spiral=main(spiral_ds, ks(i), 20,"Spiral");
-    cl_circle=main(circle_ds, ks(i), 20,"Circle");
+
+    if ks(i)==10
+        thresh_c=0.01;
+        thresh_s=0.001;
+    elseif ks(i)==20
+        thresh_c=0.1;
+        thresh_s=0.003;
+    elseif ks(i)==40
+        thresh_c=0.1;
+        thresh_s=0.003;
+    end
+
+    cl_spiral=main(spiral_ds, ks(i), 20,thresh_s,"Spiral");
+    cl_circle=main(circle_ds, ks(i), 20,thresh_c,"Circle");
 end
 
 if check_clusters(spiral_ds,cl_spiral)
@@ -32,19 +44,15 @@ end
 % figure
 % scatter(spiral_ds(:, 1), spiral_ds(:, 2), 'filled')
 
-%%
-function clusters = main(ds, k, n_eigen, name)
+
+function clusters = main(ds, k, n_eigen,threshold, name)
     S = similarity_matrix(ds,1);  % construction of the similarity matrix
     W = knn(S, k); % using knn algorithm we compute the adjacency matrix
     D = degreeMatrix(W); % construction of the degree matrix
     L = D - W; % Laplacian matrix 
     % W, D, L matrices are stored in sparse format
     
-    if k==10
-        %spiegare perché scelta soglia
-    thresh_c=0.01;
-    thresh_s=0.001;
-    
+    plot_L(L,k,name)
     
     % We only consider the eigevalues closest to 0 by setting a treshold.
     % The matrix U is then computed using their corresponding eigenvectors.
@@ -59,8 +67,16 @@ function clusters = main(ds, k, n_eigen, name)
     plot_clusters(ds,clusters,name,k)
 
     %other methods
-    hierarchical_cl(ds,U);
-    dbscan_cl(ds,U);
+    hierarchical_cl(ds);
+    dbscan_cl(ds);
+    k_means(ds,k);
+end
+
+
+function plot_L(L,k,name)
+    figure;
+    spy(L);
+    title(sprintf("%s Laplacian matrix, k=%d.",name,k))
 end
 
 function plot_clusters(ds,clusters,name,k)
@@ -82,18 +98,18 @@ function [eigenvalues,eigenvectors]=eigen(L,n_eigen,name,k)
     eigenvalues = diag(eigenvaluesMatrix);
 
     % plot of the n smallest eigenvalues,
-    semilogy(eigenvalues, '-o', 'MarkerSize', 5, 'Color', 'b');
+    plot(eigenvalues, '-o', 'MarkerSize', 5, 'Color', 'b');
     xlabel('Eigenvalues');
     ylabel('Value')
     title(sprintf('k=%d. First %d eigenvalues. %s',k, n_eigen,name))
 end
 
-function hierarchical_cl(ds,U)
+function hierarchical_cl(ds,k,name)
 %hierarchical
-    Z = linkage(U, 'ward'); % Metrica di linkage
+    Z = linkage(ds(:,1:2), 'ward'); % Metrica di linkage
     numClusters = 3; % Numero di cluster desiderati
     clusters = cluster(Z, 'maxclust', numClusters);
-  
+
     figure;
     scatter(ds(:,1), ds(:,2), 15, clusters, 'filled');
     title('Hierarchical Clustering');
@@ -101,15 +117,15 @@ function hierarchical_cl(ds,U)
     ylabel('Y');
 end
 
-function dbscan_cl(ds,U)
+function dbscan_cl(ds,k,name)
     %dbscan
     epsilon = 0.05; % distanza massima tra punti per considerarli vicini
     minPts = 3;    % numero minimo di punti richiesti per formare un cluster
-    [labels, ~] = dbscan(U, epsilon, minPts);
+    [labels, ~] = dbscan(ds(:,1:2), epsilon, minPts);
     
     figure;
     scatter(ds(:,1), ds(:,2), 15, labels, 'filled');
-    title('DBSCAN Clustering');
+    title(sprintf('DBSCAN Clustering, %s data-set. k = %d',k,name));
     xlabel('X');
     ylabel('Y');
 end
@@ -179,7 +195,7 @@ function b=check_clusters(ds,cl)
     %check if clusters we found are the same of the ones in the third
     %column of the file spiral.mat indipendentemente of the order
     %********************************************************************* 
-    % ******************************************************************************
+    %******************************************************************************
     [m,n] =size(ds);
     e=1;
     f=1;
@@ -196,7 +212,6 @@ function b=check_clusters(ds,cl)
                 c1=[c1,e];
             end
 
-
             if cl(i)==cl(i-1)
                 c2=[c2,f];
             else
@@ -212,7 +227,7 @@ function b=check_clusters(ds,cl)
 end
 
 
-function k_means(ds,k)
+function k_means(ds,k,name)
     ds=ds(:,1:2);
     [idx, C] = kmeans(ds, k);
     
@@ -221,7 +236,7 @@ function k_means(ds,k)
     hold on;
     plot(C(:,1), C(:,2), 'kx', 'MarkerSize', 15, 'LineWidth', 3);
     legend('Cluster 1', 'Cluster 2', 'Cluster 3', 'Centroids');
-    title('Clustering k-means');
+    title(sprintf('Clustering k-means, %d data set',name));
     hold off;
 end
 
