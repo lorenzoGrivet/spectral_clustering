@@ -31,21 +31,18 @@ else
     disp("Cluster (spiral) non corretti");
 end
 
-other_methods(circle_ds,"circle")
-other_methods(spiral_ds,"spiral")
+other_methods(circle_ds,"circle");
+other_methods(spiral_ds,"spiral");
+
 
 %%
-% k_means(spiral_ds,3)
-% k_means(circle_ds,3)
-% 
-% %%
 % figure
-% scatter(circle_ds(:, 1), circle_ds(:, 2), 'filled' )
-% %%
+% scatter(circle_ds(:, 1), circle_ds(:, 2), 'filled' );
+%%
 % figure
-% scatter(spiral_ds(:, 1), spiral_ds(:, 2), 'filled')
+% scatter(spiral_ds(:, 1), spiral_ds(:, 2), 'filled');
 
-
+%%
 function clusters = main(ds, k, n_eigen,threshold, name)
     S = similarity_matrix(ds,1);  % construction of the similarity matrix
     W = knn(S, k); % using knn algorithm we compute the adjacency matrix
@@ -53,11 +50,10 @@ function clusters = main(ds, k, n_eigen,threshold, name)
     L = D - W; % Laplacian matrix 
     % W, D, L matrices are stored in sparse format
     
-    plot_L(L,k,name)
+%     plot_L(L,k,name)
     
     % We only consider the eigevalues closest to 0 by setting a treshold.
     % The matrix U is then computed using their corresponding eigenvectors.
-
     [eigenvalues,eigenvectors]=eigen(L,n_eigen,name,k);
     
     n_clusters = nnz(eigenvalues <= threshold);
@@ -65,53 +61,54 @@ function clusters = main(ds, k, n_eigen,threshold, name)
    
     clusters = kmeans(U, n_clusters);
 
-    plot_clusters(ds,clusters,name,k)
+    plot_clusters(ds,clusters,name,k);
 end
 
 function other_methods(ds,name)
     %other methods
     hierarchical_cl(ds,name);
-    dbscan_cl(ds,name);
+    %dbscan_cl(ds,name);
     k_means(ds,name);
 end
 
 
 function plot_L(L,k,name)
-    figure;
-    spy(L);
+%     figure;
+%     spy(L);
     %title(sprintf("%s Laplacian matrix, k=%d.",name,k))
 end
 
 function plot_clusters(ds,clusters,name,k)
     % scatter plot of the dataset points with respect to the clusters
     % computed by the kmeans algrithm 
-    figure;
-    gscatter(ds(:,1), ds(:,2), clusters)
-    legend('Cluster 1', 'Cluster 2', 'Cluster 3');
-    colormap(jet);
-    xlabel('X')
-    ylabel('Y')
+%     figure;
+%     gscatter(ds(:,1), ds(:,2), clusters)
+%     legend('Cluster 1', 'Cluster 2', 'Cluster 3');
+%     colormap(jet);
+%     xlabel('X')
+%     ylabel('Y')
     %title(sprintf('k=%d. %s dataset clusters', k,name))
 end
 
 function [eigenvalues,eigenvectors]=eigen(L,n_eigen,name,k)
     % computation of the eigenvalues and eigenvectors
     [eigenvectors, eigenvaluesMatrix] = eigs(L, n_eigen, 'smallestabs');
-    figure;
+    
     eigenvalues = diag(eigenvaluesMatrix);
-
+    %figure;
     % plot of the n smallest eigenvalues,
-    plot(eigenvalues, '-o', 'MarkerSize', 5, 'Color', 'b');
-    xlabel('Eigenvalues');
-    ylabel('Value')
+%     plot(eigenvalues, '-o', 'MarkerSize', 5, 'Color', 'b');
+%     xlabel('Eigenvalues');
+%     ylabel('Value')
     %title(sprintf('k=%d. First %d eigenvalues. %s',k, n_eigen,name))
 end
 
 function hierarchical_cl(ds,name)
 %hierarchical
-    Z = linkage(ds(:,1:2), 'ward'); % Metrica di linkage
+    Z = linkage(ds(:,1:2), 'complete'); % Metrica di linkage
     numClusters = 3; % Numero di cluster desiderati
     clusters = cluster(Z, 'maxclust', numClusters);
+
 
     figure;
     scatter(ds(:,1), ds(:,2), 15, clusters, 'filled');
@@ -179,8 +176,7 @@ function W = knn(S, k)
     end
     
 
-    %Elements added to make the matrix simmetrycal
-    disp(nnz(M) - 10*m)
+    
 
     if M == M'
         W = sparse(M);
