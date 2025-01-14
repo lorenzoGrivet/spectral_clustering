@@ -178,8 +178,6 @@ function W = knn(S, k)
     end
     
 
-    
-
     if M == M'
         W = sparse(M);
     end
