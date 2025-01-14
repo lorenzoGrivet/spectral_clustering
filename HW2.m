@@ -8,7 +8,7 @@ spiral_ds=load("Spiral.mat").X;
 circle_ds=load("Circle.mat").X;
 
 ks=[10,20,40];
-for i = 1:length(ks)
+for i = 1:length(ks) 
 
     if ks(i)==10
         thresh_c=0.01;
@@ -31,16 +31,17 @@ else
     disp("Cluster (spiral) non corretti");
 end
 
-other_methods(circle_ds,"circle");
-other_methods(spiral_ds,"spiral");
+other_methods(circle_ds,"circle", 0.7);
+other_methods(spiral_ds,"spiral", 1.5);
 
 
 %%
-% figure
-% scatter(circle_ds(:, 1), circle_ds(:, 2), 'filled' );
-%%
-% figure
-% scatter(spiral_ds(:, 1), spiral_ds(:, 2), 'filled');
+%plot of the original data sets
+figure
+scatter(circle_ds(:, 1), circle_ds(:, 2), 'filled' );
+
+figure
+scatter(spiral_ds(:, 1), spiral_ds(:, 2), 'filled');
 
 %%
 function clusters = main(ds, k, n_eigen,threshold, name)
@@ -50,7 +51,7 @@ function clusters = main(ds, k, n_eigen,threshold, name)
     L = D - W; % Laplacian matrix 
     % W, D, L matrices are stored in sparse format
     
-%     plot_L(L,k,name)
+    plot_L(L,k,name)
     
     % We only consider the eigevalues closest to 0 by setting a treshold.
     % The matrix U is then computed using their corresponding eigenvectors.
@@ -64,29 +65,29 @@ function clusters = main(ds, k, n_eigen,threshold, name)
     plot_clusters(ds,clusters,name,k);
 end
 
-function other_methods(ds,name)
+function other_methods(ds,name, epsilon)
     %other methods
     hierarchical_cl(ds,name);
-    %dbscan_cl(ds,name);
+    dbscan_cl(ds,name, epsilon);
     k_means(ds,name);
 end
 
 
 function plot_L(L,k,name)
-%     figure;
-%     spy(L);
+    figure;
+    spy(L);
     %title(sprintf("%s Laplacian matrix, k=%d.",name,k))
 end
 
 function plot_clusters(ds,clusters,name,k)
-    % scatter plot of the dataset points with respect to the clusters
-    % computed by the kmeans algrithm 
-%     figure;
-%     gscatter(ds(:,1), ds(:,2), clusters)
-%     legend('Cluster 1', 'Cluster 2', 'Cluster 3');
-%     colormap(jet);
-%     xlabel('X')
-%     ylabel('Y')
+    %scatter plot of the dataset points with respect to the clusters
+    %computed by the kmeans algrithm 
+    figure;
+    gscatter(ds(:,1), ds(:,2), clusters)
+    legend('Cluster 1', 'Cluster 2', 'Cluster 3');
+    colormap(jet);
+    xlabel('X')
+    ylabel('Y')
     %title(sprintf('k=%d. %s dataset clusters', k,name))
 end
 
@@ -95,33 +96,34 @@ function [eigenvalues,eigenvectors]=eigen(L,n_eigen,name,k)
     [eigenvectors, eigenvaluesMatrix] = eigs(L, n_eigen, 'smallestabs');
     
     eigenvalues = diag(eigenvaluesMatrix);
-    %figure;
-    % plot of the n smallest eigenvalues,
-%     plot(eigenvalues, '-o', 'MarkerSize', 5, 'Color', 'b');
-%     xlabel('Eigenvalues');
-%     ylabel('Value')
+    figure;
+    %plot of the n smallest eigenvalues,
+    plot(eigenvalues, '-o', 'MarkerSize', 5, 'Color', 'b');
+    xlabel('Eigenvalues');
+    ylabel('Value')
     %title(sprintf('k=%d. First %d eigenvalues. %s',k, n_eigen,name))
 end
 
 function hierarchical_cl(ds,name)
-%hierarchical
-    Z = linkage(ds(:,1:2), 'complete'); % Metrica di linkage
-    numClusters = 3; % Numero di cluster desiderati
+    %hierarchical
+    Z = linkage(ds(:,1:2)); 
+    numClusters = 3; %Number of desired clusters
     clusters = cluster(Z, 'maxclust', numClusters);
 
 
     figure;
     scatter(ds(:,1), ds(:,2), 15, clusters, 'filled');
+    
     %title(sprintf('Hierarchical Clustering, %s data set.',name));
     xlabel('X');
     ylabel('Y');
 end
 
-function dbscan_cl(ds,name)
+function dbscan_cl(ds,name, epsilon)
     %dbscan
-    epsilon = 0.5; % distanza massima tra punti per considerarli vicini
-    minPts = 3;    % numero minimo di punti richiesti per formare un cluster
+    minPts = 4;    % minimum number of points to form a cluster
     [labels, ~] = dbscan(ds(:,1:2), epsilon, minPts);
+    n_of_outliers = sum(labels == -1);
     
     figure;
     scatter(ds(:,1), ds(:,2), 15, labels, 'filled');
@@ -170,7 +172,7 @@ function W = knn(S, k)
         sortedIndices = sortedIndices(1 : k);
         for j = 1 : length(sortedIndices)
             M(i,sortedIndices(j)) = S(i,sortedIndices(j));
-            M(sortedIndices(j), i) = S(i,sortedIndices(j));
+            M(sortedIndices(j), i) = S(i,sortedIndices(j)); %To make it symmetric
         end
 
     end
@@ -192,9 +194,8 @@ end
 function b=check_clusters(ds,cl)
 
     %check if clusters we found are the same of the ones in the third
-    %column of the file spiral.mat indipendentemente of the order
-    %********************************************************************* 
-    %******************************************************************************
+    %column of the file spiral.mat
+    
     [m,n] =size(ds);
     e=1;
     f=1;
