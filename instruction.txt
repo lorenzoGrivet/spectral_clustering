@@ -1,0 +1,5 @@
+The folder contains the two data sets and the file HW2, the whole code is contained in that Matlab file. In order to execute it just click on the 'Run' button. It will open lots of graphs and they are the ones that we used in the report.
+
+
+
+
